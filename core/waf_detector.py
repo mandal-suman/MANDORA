@@ -1,0 +1,1 @@
+# Auto WAF detection & evasion
