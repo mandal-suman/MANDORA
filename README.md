@@ -25,7 +25,7 @@ MANDORA/
 ├── mandora.py            # Main script
 ├── requirements.txt      # Dependencies
 ├── README.md             # Docs
-├── LICENSE               # MIT License
+├── LICENSE               # GPL-3.0 license
 ├── .gitignore            # Git ignore file
 ├── wordlists/
 │   └── wordlists.txt     # Default wordlist
