@@ -1,39 +1,38 @@
-# MANDORA v1.0 - Advanced Directory Bruteforcing Tool
+# MANDORA v0.2.1 - Adaptive Directory Bruteforcing Toolkit
 
 **MANDORA** is a powerful, modular tool for directory bruteforcing. It’s designed for ethical hackers, bug bounty hunters, and cybersecurity learners.
 
-> **Status:** v1.0 (Stable release)
+> **Status:** v0.2.1 (Active development)
 > **Purpose:** Ethical hacking & educational use only
 
 ---
 
 ## 🔑 Features
 
-* Brute-force hidden web directories using wordlists
-* Detect Web Application Firewalls (WAF) with `wafw00f`
-* Scan up to 4 directory levels deep
-* Save results in structured folders by domain
-* Modular Python codebase for easy updates
-* Real-time progress output
+* Layered brute force with soft-404 fingerprinting to reduce redirect noise
+* WAF detection powered by `wafw00f` with focused vendor reporting
+* Header rotation and optional proxy pool (`MANDORA_PROXIES`) for evasive scanning
+* Depth-controlled enumeration (1–4) with per-depth results and summaries
+* Graceful interrupt handling with persistent output and stats recap
+* Modular Python codebase for easy upgrades
 
 ---
 
-## 📁 File Structure
+## 📁 Layout
 
 ```
 MANDORA/
-├── mandora.py            # Main script
-├── requirements.txt      # Dependencies
-├── README.md             # Docs
-├── LICENSE               # GPL-3.0 license
-├── .gitignore            # Git ignore file
+├── mandora.py            # CLI entry point
+├── core/
+│   ├── scanner.py        # Directory discovery engine
+│   └── waf_detector.py   # WAF identification bridge
 ├── wordlists/
-│   └── wordlists.txt     # Default wordlist
-├── output/               # Scan results
-└── core/
-    ├── __init__.py       # Init
-    ├── scanner.py        # Scanning logic
-    └── waf_detector.py   # WAF detection
+│   └── wordlists.txt     # Default brute-force terms
+├── output/               # Scan artefacts (created at runtime)
+├── CHANGELOG.md          # Release notes
+├── README.md             # Documentation
+├── requirements.txt      # Dependencies
+└── LICENSE               # GPL-3.0 license
 ```
 
 ---
@@ -53,32 +52,21 @@ cd MANDORA
 pip install -r requirements.txt
 ```
 
-### 3. Test Installation
+### 3. Confirm the CLI boots
 
 ```bash
 python mandora.py
 ```
 
+You can override the default proxies by exporting `MANDORA_PROXIES="http://127.0.0.1:8080, socks5://127.0.0.1:1080"`.
+
 ---
 
-## 📝 Wordlist
+## 📝 Wordlist Tips
 
-**File:** `wordlists/wordlists.txt`
-
-**Examples:**
-
-```
-admin
-login
-dashboard
-api
-config
-```
-
-**Tips:**
-
-* Use lowercase
-* Add target-specific and tech-specific terms
+- Start from `wordlists/wordlists.txt` and extend with tech-aware endpoints
+- Keep entries lowercase unless the target is case-sensitive
+- For niche apps, import bigger lists via `--wordlist` (coming soon) or replace the default file
 
 ---
 
@@ -90,18 +78,31 @@ python mandora.py
 
 **Prompts:**
 
-1. Enter target URL
-2. Select depth (1–4)
+1. Target URL (scheme optional; defaults to https)
+2. Depth (1–4)
 
 **Sample Output:**
 
 ```
-🌐 https://testsite.com
-✅ WAF: None
-✅ Wordlist loaded
-[+] Found: /admin
-[+] Found: /admin/uploads
-📁 Saved to: output/testsite_com
+=== MANDORA: Directory Bruteforcer with WAF Detection ===
+🌐 Enter target site (e.g., https://example.com): https://demo.target
+🔍 Running WAF detection...
+🔒 WAF detected:
+ - Cloudflare (vendor=Cloudflare Inc.)
+✅ Wordlists loaded successfully
+[+] Found (depth 1): https://demo.target/admin [status 200]
+[~] Redirected to https://demo.target/home from https://demo.target/admin/login
+[-] Soft 404 detected: https://demo.target/secret
+
+--- Scan Summary ---
+Total requests: 50
+Valid hits: 3
+Protected hits: 1
+Redirects skipped: 7
+Soft 404 filtered: 6
+Processing errors: 0
+
+📁 Output saved in: output/demo_target
 ```
 
 ---
@@ -110,73 +111,58 @@ python mandora.py
 
 ```
 output/
-└── testsite_com/
-    ├── waf_detected.txt
-    ├── depth_1.txt
-    ├── depth_2.txt
-    └── scan_summary.txt
+└── demo_target/
+    ├── waf_detected.txt      # summarised WAF signals
+    ├── depth_1.txt           # URLs discovered at depth 1
+    └── depth_2.txt           # ...and so on
 ```
 
-* Plain text URLs
-* Timestamped
-* Status codes included
+- Each line contains the URL, status, and classification note
+- Results persist even if you abort mid-scan
 
 ---
 
-### Scan Depth Strategy
+### Depth Strategy
 
-* Depth 1: /admin
-* Depth 2: /admin/panel
-* Depth 3: /admin/panel/config
-* Depth 4: /admin/panel/config/database
-
----
-
-## ⚠️ Legal Use Only
-
-* Test only what you **own or have permission** to scan
-* Always follow ethical hacking guidelines
-* Never target unauthorized systems
+- Depth 1: /admin
+- Depth 2: /admin/panel
+- Depth 3: /admin/panel/config
+- Depth 4: /admin/panel/config/database
 
 ---
 
-## 🤝 Contribute
+## ⚠️ Legal Use
 
-1. Fork and clone the repo
-2. Create a branch and add your changes
-3. Submit a pull request
+- Scan only assets you own or have explicit permission to test
+- Observe local laws and responsible disclosure best practices
+- Respect rate limits and pause if targets degrade
 
-**Ideas:**
+---
 
-* Speed improvements
-* JSON/CSV output
-* WAF bypass
-* Error handling
+## 🤝 Contributing
+
+1. Fork this repository
+2. Create a feature branch off `main`
+3. Add tests or sample output where relevant
+4. Open a pull request with context and reproduction steps
+
+**Wish list:** multithreaded mode, alternative output formats, custom headers per target, resumable sessions
 
 ---
 
 ## 👤 Author
 
-**Suman Mandal** – Cybersecurity student & open-source enthusiast
-
-GitHub: [@sumanmandal](https://github.com/mandal-suman)
-
----
-
-## 📌 Roadmap
-
-* **v1.1:** Multithreading, rate limits, better error handling
-* **v1.2+:** Subdomain scan, export formats, config files
-* **v2.0:** GUI/web interface, cloud use, team collaboration
+- Suman Mandal — cybersecurity learner and open-source contributor
+- GitHub: [@mandal-suman](https://github.com/mandal-suman)
 
 ---
 
-## 🙏 Thanks To
+## 🙏 Acknowledgements
 
-* `wafw00f` project
-* `requests` library maintainers
-* Cybersecurity community
+- `wafw00f` maintainers for robust WAF detection heuristics
+- `requests` ecosystem contributors
+- Community testers providing feedback on redirect edge cases
 
 ---
 
-**Built with ❤️ for the hacking community – May 2025**
+**Built for responsible reconnaissance — January 2026**
